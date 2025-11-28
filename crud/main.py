@@ -1,14 +1,15 @@
-# main.py (snippet)
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
-from database import SessionLocal, engine, Base
+
+import models, schemas, crud
+from database import engine, SessionLocal, Base
 
 app = FastAPI()
 
-# create tables (only needed once at startup)
+# 1. create tables
 Base.metadata.create_all(bind=engine)
 
-# dependency for routes
+# 2. DB session dependency
 def get_db():
     db = SessionLocal()
     try:
@@ -16,7 +17,33 @@ def get_db():
     finally:
         db.close()
 
-@app.get("/")
-def read_root(db: Session = Depends(get_db)):
-    # you can use db here to query
-    return {"message": "DB ready"}
+# 3. ROUTES
+
+@app.post("/users/", response_model=schemas.UserResponse)
+def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
+    return crud.create_user(db, user)
+
+@app.get("/users/{user_id}", response_model=schemas.UserResponse)
+def read_user(user_id: int, db: Session = Depends(get_db)):
+    user = crud.get_user(db, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
+
+@app.get("/users/", response_model=list[schemas.UserResponse])
+def read_all_users(db: Session = Depends(get_db)):
+    return crud.get_all_users(db)
+
+@app.put("/users/{user_id}", response_model=schemas.UserResponse)
+def update_user(user_id: int, user: schemas.UserCreate, db: Session = Depends(get_db)):
+    updated = crud.update_user(db, user_id, user)
+    if not updated:
+        raise HTTPException(status_code=404, detail="User not found")
+    return updated
+
+@app.delete("/users/{user_id}")
+def delete_user(user_id: int, db: Session = Depends(get_db)):
+    deleted = crud.delete_user(db, user_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="User not found")
+    return {"message": "User deleted"}
