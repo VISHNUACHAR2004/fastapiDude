@@ -41,3 +41,31 @@ def delete_user(db: Session, user_id: int):
     db.delete(user)
     db.commit()
     return user
+
+from auth import hash_password, verify_password
+
+# SIGNUP
+def create_user_auth(db: Session, user: schemas.UserSignup):
+    hashed_pw = hash_password(user.password)
+
+    db_user = models.User(
+        name=user.name,
+        email=user.email,
+        hashed_password=hashed_pw
+    )
+
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
+# LOGIN
+def authenticate_user(db: Session, email: str, password: str):
+    user = db.query(models.User).filter(models.User.email == email).first()
+    if not user:
+        return None
+
+    if not verify_password(password, user.hashed_password):
+        return None
+
+    return user

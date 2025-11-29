@@ -47,3 +47,43 @@ def delete_user(user_id: int, db: Session = Depends(get_db)):
     if not deleted:
         raise HTTPException(status_code=404, detail="User not found")
     return {"message": "User deleted"}
+
+from jwt_handler import create_access_token
+
+# SIGNUP
+@app.post("/auth/signup")
+def signup(user: schemas.UserSignup, db: Session = Depends(get_db)):
+    # check if user exists
+    existing = db.query(models.User).filter(models.User.email == user.email).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Email already registered")
+
+    created_user = crud.create_user_auth(db, user)
+    return {"message": "User created successfully", "id": created_user.id}
+
+# LOGIN
+@app.post("/auth/login")
+def login(user: schemas.UserLogin, db: Session = Depends(get_db)):
+    authenticated_user = crud.authenticate_user(db, user.email, user.password)
+
+    if not authenticated_user:
+        raise HTTPException(status_code=400, detail="Invalid email or password")
+
+    # Generate JWT
+    token = create_access_token({"user_id": authenticated_user.id})
+
+    return {"access_token": token, "token_type": "bearer"}
+
+from fastapi import Header
+
+@app.get("/profile")
+def profile(token: str = Header(...), db: Session = Depends(get_db)):
+    try:
+        from jose import jwt
+        payload = jwt.decode(token, "SUPERSECRETJWTKEY", algorithms=["HS256"])
+        user_id = payload.get("user_id")
+    except:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    return user
