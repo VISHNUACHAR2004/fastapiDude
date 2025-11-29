@@ -241,3 +241,58 @@ age: 22
 
 - It gives consistent output shape.
 
+---
+
+# 4. crud.py 
+
+Imagine again:
+
+- database.py → the helper who opens/closes the register
+
+- models.py → the template for how the register looks
+
+- schemas.py → forms for input & output
+
+Now the question is:
+
+📌 Who actually writes into the register?
+📌 Who reads from the register?
+📌 Who updates entries?
+📌 Who deletes entries?
+
+You need a teacher who knows exactly what to do, step by step.
+
+That teacher = crud.py
+
+Think of crud.py as the brain doing the real work.
+
+crud.py is like the accountant of your school.
+
+When the principal (API route) says:
+
+“Add this student”
+
+The accountant doesn’t ask questions — he goes and:
+
+- opens the register
+
+- writes the entry
+
+- saves it
+
+- closes the register
+
+When principal says:
+
+“Give me all students”
+
+He goes, reads, returns.
+
+When principal says:
+
+“Delete student #4”
+
+He finds the roll no, removes it.
+
+Your principal (API route) should not do the writing themselves.
+They just “tell orders” → crud.py executes them.
