@@ -23,4 +23,3 @@ users.db
 celerybeat-schedule
 *.egg-info
 dist
-build
