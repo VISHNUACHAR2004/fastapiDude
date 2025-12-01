@@ -24,3 +24,4 @@ celerybeat-schedule
 *.egg-info
 dist
 build
+*.egg
