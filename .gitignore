@@ -20,3 +20,4 @@ pytest_cache
 .cache
 .ipynb_checkpoints
 users.db
+celerybeat-schedule
