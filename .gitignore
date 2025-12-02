@@ -22,3 +22,4 @@ pytest_cache
 users.db
 nvnvn
 ``
+nvnvenv
