@@ -34,5 +34,5 @@ def delete_user(user_id: int):
 
 
 beb
-nkjrejre
+
 
