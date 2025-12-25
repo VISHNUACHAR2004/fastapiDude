@@ -33,4 +33,3 @@ def delete_user(user_id: int):
 
 
 ss
-ss
